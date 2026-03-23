@@ -1,0 +1,13 @@
+push_notifications_enable:
+  name: Enable push notifications
+  description: >-
+    Store the JWT token used to authenticate with the Zendo push notification
+    backend. This is typically called by the Zendo mobile app during setup.
+  fields:
+    token:
+      name: Token
+      description: The JWT token for push notifications.
+      required: true
+      example: "eyJhbGciOiJIUzI1NiIs..."
+      selector:
+        text:

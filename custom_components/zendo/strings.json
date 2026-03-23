@@ -9,5 +9,17 @@
     "abort": {
       "already_configured": "Zendo is already configured."
     }
+  },
+  "services": {
+    "push_notifications_enable": {
+      "name": "Enable push notifications",
+      "description": "Store the JWT token used to authenticate with the Zendo push notification backend.",
+      "fields": {
+        "token": {
+          "name": "Token",
+          "description": "The JWT token for push notifications."
+        }
+      }
+    }
   }
 }
