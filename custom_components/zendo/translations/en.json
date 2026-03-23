@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Zendo",
-        "description": "Set up the Zendo integration to control Home Assistant from a floor plan."
+        "description": "This is the companion integration for Zendo. To get started, download the Zendo app on your phone or tablet."
       }
     },
     "abort": {
@@ -11,13 +11,31 @@
     }
   },
   "services": {
-    "push_notifications_enable": {
-      "name": "Enable push notifications",
+    "setup_push_notifications": {
+      "name": "Set up push notifications",
       "description": "Store the JWT token used to authenticate with the Zendo push notification backend.",
       "fields": {
         "token": {
           "name": "Token",
           "description": "The JWT token for push notifications."
+        }
+      }
+    },
+    "refresh_profiles": {
+      "name": "Refresh people",
+      "description": "Fetch the list of people from the Zendo backend and create notification entities."
+    },
+    "send_notification": {
+      "name": "Send notification",
+      "description": "Send a push notification to one or more Zendo people.",
+      "fields": {
+        "message": {
+          "name": "Message",
+          "description": "The notification message."
+        },
+        "interruption_level": {
+          "name": "Interruption level",
+          "description": "Optional. Set to \"time_sensitive\" for time-sensitive notifications or \"critical\" for critical alerts that bypass Do Not Disturb."
         }
       }
     }

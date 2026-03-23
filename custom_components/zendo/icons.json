@@ -1,0 +1,13 @@
+{
+  "services": {
+    "setup_push_notifications": {
+      "service": "mdi:key-variant"
+    },
+    "refresh_profiles": {
+      "service": "mdi:file-refresh"
+    },
+    "send_notification": {
+      "service": "mdi:message-arrow-right"
+    }
+  }
+}

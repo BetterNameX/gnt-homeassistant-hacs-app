@@ -1,5 +1,5 @@
-push_notifications_enable:
-  name: Enable push notifications
+setup_push_notifications:
+  name: Set up push notifications
   description: >-
     Store the JWT token used to authenticate with the Zendo push notification
     backend. This is typically called by the Zendo mobile app during setup.
@@ -11,3 +11,38 @@ push_notifications_enable:
       example: "eyJhbGciOiJIUzI1NiIs..."
       selector:
         text:
+
+refresh_profiles:
+  name: Refresh people
+  description: >-
+    Fetch the list of people from the Zendo backend and create notification
+    entities.
+
+send_notification:
+  name: Send notification
+  description: >-
+    Send a push notification to one or more Zendo people.
+  target:
+    entity:
+      domain: notify
+      integration: zendo
+  fields:
+    message:
+      name: Message
+      description: The notification message.
+      required: true
+      selector:
+        text:
+    interruption_level:
+      name: Interruption level
+      description: >-
+        Optional. Set to "time_sensitive" for time-sensitive notifications or
+        "critical" for critical alerts that bypass Do Not Disturb.
+      required: false
+      selector:
+        select:
+          options:
+            - label: "Time sensitive"
+              value: "time_sensitive"
+            - label: "Critical"
+              value: "critical"

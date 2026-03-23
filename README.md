@@ -8,6 +8,8 @@ Control Home Assistant from a floor plan with [Zendo](https://myzendo.com).
 
 ### HACS (Recommended)
 
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=BetterNameX&repository=gnt-homeassistant-hacs-app&category=integration)
+
 1. Open HACS in your Home Assistant instance.
 2. Go to **Integrations**.
 3. Click the three-dot menu in the top right and select **Custom repositories**.

@@ -11,7 +11,15 @@ from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import API_VERSION, CONF_PUSH_NOTIFICATION_TOKEN, DOMAIN, SIGNAL_CONFIG_UPDATED
+from .const import (
+    API_VERSION,
+    INTEGRATION_VERSION,
+    CONF_CACHED_PROFILES,
+    CONF_PUSH_NOTIFICATION_TOKEN,
+    DOMAIN,
+    SIGNAL_CONFIG_UPDATED,
+    SIGNAL_PROFILES_UPDATED,
+)
 
 
 async def async_setup_entry(
@@ -30,6 +38,7 @@ class ZendoStatusBinarySensor(BinarySensorEntity):
     _attr_name = "Status"
     _attr_device_class = BinarySensorDeviceClass.CONNECTIVITY
     _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_entity_registry_visible_default = False
 
     def __init__(self, entry: ConfigEntry) -> None:
         """Initialise the sensor."""
@@ -42,14 +51,19 @@ class ZendoStatusBinarySensor(BinarySensorEntity):
         return True
 
     @property
-    def extra_state_attributes(self) -> dict[str, str | bool]:
-        """Return API version and push notification configuration status."""
+    def extra_state_attributes(self) -> dict:
+        """Return API version, push notification status, and people list."""
         token = self._entry.data.get(CONF_PUSH_NOTIFICATION_TOKEN)
         push_configured = isinstance(token, str) and len(token) > 0
 
+        profiles: list[dict[str, str]] = self._entry.data.get(CONF_CACHED_PROFILES, [])
+        people = [p["label"] for p in profiles]
+
         return {
+            "integration_version": INTEGRATION_VERSION,
             "api_version": API_VERSION,
             "push_notifications_configured": push_configured,
+            "people": people,
         }
 
     @property
@@ -63,9 +77,14 @@ class ZendoStatusBinarySensor(BinarySensorEntity):
         )
 
     async def async_added_to_hass(self) -> None:
-        """Register dispatcher listener to update state when config changes."""
+        """Register dispatcher listeners to update state when config or profiles change."""
         self.async_on_remove(
             async_dispatcher_connect(
                 self.hass, SIGNAL_CONFIG_UPDATED, self.async_write_ha_state
+            )
+        )
+        self.async_on_remove(
+            async_dispatcher_connect(
+                self.hass, SIGNAL_PROFILES_UPDATED, self.async_write_ha_state
             )
         )

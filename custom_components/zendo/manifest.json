@@ -4,8 +4,8 @@
   "codeowners": ["@BetterNameX"],
   "config_flow": true,
   "documentation": "https://github.com/BetterNameX/gnt-homeassistant-hacs-app",
-  "iot_class": "cloud_polling",
+  "iot_class": "cloud_push",
   "issue_tracker": "https://github.com/BetterNameX/gnt-homeassistant-hacs-app/issues",
   "requirements": [],
-  "version": "1.0.0"
+  "version": "1.0.1"
 }
