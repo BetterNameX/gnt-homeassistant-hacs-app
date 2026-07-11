@@ -43,7 +43,6 @@ from datetime import timedelta
 import voluptuous as vol
 
 from homeassistant.components.binary_sensor import (
-    BinarySensorDeviceClass,
     BinarySensorEntity,
 )
 from homeassistant.components.sensor import (
@@ -89,7 +88,7 @@ SENSOR_PROPERTIES: dict[str, dict] = {
         "device_class": SensorDeviceClass.ENUM,
         "state_class": None,
         "native_unit": None,
-        "icon": "mdi:battery",
+        "icon": "mdi:battery-charging",
         "state_key": "battery_state",
         "options": ["charger_unplugged", "charging", "plugged_not_charging"],
     },
@@ -149,7 +148,7 @@ SENSOR_PROPERTIES: dict[str, dict] = {
 BINARY_SENSOR_PROPERTIES: dict[str, dict] = {
     "locked": {
         "name": "Locked",
-        "device_class": BinarySensorDeviceClass.LOCK,
+        "device_class": None,
         "icon": None,
         "state_key": "locked",
     },
