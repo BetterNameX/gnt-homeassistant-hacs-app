@@ -84,6 +84,15 @@ SENSOR_PROPERTIES: dict[str, dict] = {
         "icon": None,
         "state_key": "battery_level",
     },
+    "battery_state": {
+        "name": "Battery state",
+        "device_class": SensorDeviceClass.ENUM,
+        "state_class": None,
+        "native_unit": None,
+        "icon": "mdi:battery",
+        "state_key": "battery_state",
+        "options": ["charger_unplugged", "charging", "plugged_not_charging"],
+    },
     "screen_brightness": {
         "name": "Screen brightness",
         "device_class": None,
@@ -107,7 +116,7 @@ SENSOR_PROPERTIES: dict[str, dict] = {
         "native_unit": None,
         "icon": "mdi:monitor",
         "state_key": "screen_state",
-        "options": ["active", "dimmed", "black", "clock"],
+        "options": ["active", "screensaver"],
     },
     "color_scheme": {
         "name": "Color scheme",
@@ -138,12 +147,6 @@ SENSOR_PROPERTIES: dict[str, dict] = {
 }
 
 BINARY_SENSOR_PROPERTIES: dict[str, dict] = {
-    "battery_charging": {
-        "name": "Charging",
-        "device_class": BinarySensorDeviceClass.BATTERY_CHARGING,
-        "icon": None,
-        "state_key": "battery_charging",
-    },
     "locked": {
         "name": "Locked",
         "device_class": BinarySensorDeviceClass.LOCK,
@@ -330,14 +333,6 @@ class BNGntManagedDeviceRegistry:
         uid = f"{profile_id}_{device_id}"
         is_new = uid not in self._devices
 
-        # Resolve profile name from cached profiles (fetched via push notification setup)
-        profile_name = ""
-        cached_profiles = self._entry.data.get("cached_profiles", [])
-        for p in cached_profiles:
-            if p.get("id") == profile_id:
-                profile_name = p.get("label", "")
-                break
-
         model = _build_model(device_brand, device_model_name)
 
         dev_reg = dr.async_get(self._hass)
@@ -354,7 +349,6 @@ class BNGntManagedDeviceRegistry:
             self._devices[uid] = {
                 "profile_id": profile_id,
                 "device_id": device_id,
-                "profile_name": profile_name,
                 "device_name": device_name,
                 "device_brand": device_brand,
                 "device_type": device_type,
@@ -371,7 +365,6 @@ class BNGntManagedDeviceRegistry:
             dev = self._devices[uid]
             dev.update(
                 {
-                    "profile_name": profile_name,
                     "device_name": device_name,
                     "device_brand": device_brand,
                     "device_type": device_type,
@@ -627,7 +620,6 @@ class BNGntManagedDeviceRegistry:
             persisted[uid] = {
                 "profile_id": device["profile_id"],
                 "device_id": device["device_id"],
-                "profile_name": device.get("profile_name", ""),
                 "device_name": device["device_name"],
                 "device_brand": device.get("device_brand"),
                 "device_type": device.get("device_type", ""),
@@ -777,12 +769,6 @@ class BNGntManagedDeviceBinarySensor(BinarySensorEntity):
 
     @property
     def extra_state_attributes(self) -> dict | None:
-        if self._prop_key == "locked":
-            device = self._registry.get_device(self._uid)
-            if device:
-                msg = device.get("state", {}).get("lock_message")
-                if msg:
-                    return {"lock_message": msg}
         return None
 
     def set_device_available(self, available: bool) -> None:
