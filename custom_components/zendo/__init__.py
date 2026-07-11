@@ -3,6 +3,7 @@
 import json
 import logging
 import time
+from functools import partial
 
 import voluptuous as vol
 
@@ -24,11 +25,36 @@ from .const import (
     SIGNAL_CONFIG_UPDATED,
     SIGNAL_PROFILES_UPDATED,
 )
+from .managed_devices import (
+    BNGntManagedDeviceRegistry,
+    SERVICE_MANAGED_DEVICE_APP_LOCK_SCHEMA,
+    SERVICE_MANAGED_DEVICE_APP_RELOAD_SCHEMA,
+    SERVICE_MANAGED_DEVICE_APP_UNLOCK_SCHEMA,
+    SERVICE_MANAGED_DEVICE_AUDIO_CONFIGURE_SCHEMA,
+    SERVICE_MANAGED_DEVICE_COMMAND_RESPONSE_SCHEMA,
+    SERVICE_MANAGED_DEVICE_SCREEN_CONFIGURE_SCHEMA,
+    SERVICE_MANAGED_DEVICE_SCREEN_WAKE_UP_SCHEMA,
+    SERVICE_MANAGED_DEVICE_SCREENSAVER_CONFIGURE_SCHEMA,
+    SERVICE_REGISTER_MANAGED_DEVICE_SCHEMA,
+    SERVICE_UNREGISTER_MANAGED_DEVICE_SCHEMA,
+    SERVICE_UPDATE_MANAGED_DEVICE_STATE_SCHEMA,
+    handle_managed_device_app_lock,
+    handle_managed_device_app_reload,
+    handle_managed_device_app_unlock,
+    handle_managed_device_audio_configure,
+    handle_managed_device_command_response,
+    handle_managed_device_screen_configure,
+    handle_managed_device_screen_wake_up,
+    handle_managed_device_screensaver_configure,
+    handle_register_managed_device,
+    handle_unregister_managed_device,
+    handle_update_managed_device_state,
+)
 from .notify import BNGntNotifyEntity
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR, Platform.NOTIFY]
+PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR, Platform.NOTIFY, Platform.SENSOR]
 
 SECONDS_IN_DAY = 86400
 
@@ -43,6 +69,18 @@ SERVICE_NOTIFY_SITE_CONFIG_MANIFEST_UPDATE = "notify_site_config_manifest_update
 SERVICE_RING_DOORBELL = "ring_doorbell"
 SERVICE_DOORBELL_ACTION = "doorbell_action"
 
+SERVICE_REGISTER_MANAGED_DEVICE = "register_managed_device"
+SERVICE_UNREGISTER_MANAGED_DEVICE = "unregister_managed_device"
+SERVICE_MANAGED_DEVICE_COMMAND_RESPONSE = "managed_device_command_response"
+SERVICE_UPDATE_MANAGED_DEVICE_STATE = "update_managed_device_state"
+SERVICE_MANAGED_DEVICE_SCREENSAVER_CONFIGURE = "managed_device_screensaver_configure"
+SERVICE_MANAGED_DEVICE_SCREEN_CONFIGURE = "managed_device_screen_configure"
+SERVICE_MANAGED_DEVICE_SCREEN_WAKE_UP = "managed_device_screen_wake_up"
+SERVICE_MANAGED_DEVICE_AUDIO_CONFIGURE = "managed_device_audio_configure"
+SERVICE_MANAGED_DEVICE_APP_RELOAD = "managed_device_app_reload"
+SERVICE_MANAGED_DEVICE_APP_LOCK = "managed_device_app_lock"
+SERVICE_MANAGED_DEVICE_APP_UNLOCK = "managed_device_app_unlock"
+
 STATIC_SERVICES = [
     SERVICE_SETUP_PUSH_NOTIFICATIONS,
     SERVICE_REFRESH_PROFILES,
@@ -52,6 +90,17 @@ STATIC_SERVICES = [
     SERVICE_NOTIFY_SITE_CONFIG_MANIFEST_UPDATE,
     SERVICE_RING_DOORBELL,
     SERVICE_DOORBELL_ACTION,
+    SERVICE_REGISTER_MANAGED_DEVICE,
+    SERVICE_UNREGISTER_MANAGED_DEVICE,
+    SERVICE_MANAGED_DEVICE_COMMAND_RESPONSE,
+    SERVICE_UPDATE_MANAGED_DEVICE_STATE,
+    SERVICE_MANAGED_DEVICE_SCREENSAVER_CONFIGURE,
+    SERVICE_MANAGED_DEVICE_SCREEN_CONFIGURE,
+    SERVICE_MANAGED_DEVICE_SCREEN_WAKE_UP,
+    SERVICE_MANAGED_DEVICE_AUDIO_CONFIGURE,
+    SERVICE_MANAGED_DEVICE_APP_RELOAD,
+    SERVICE_MANAGED_DEVICE_APP_LOCK,
+    SERVICE_MANAGED_DEVICE_APP_UNLOCK,
 ]
 
 # The doorbell ring sound plays a configurable number of times (1-5, default 1).
@@ -173,6 +222,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data[DOMAIN]["notify_entities"] = {}
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+
+    # --- Managed device registry ---
+
+    registry = BNGntManagedDeviceRegistry(hass, entry)
+    hass.data[DOMAIN]["managed_device_registry"] = registry
+    await registry.async_start()
 
     # --- Shared refresh logic ---
 
@@ -484,19 +539,78 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         ),
     }
 
-    for name, (handler, schema) in service_map.items():
+    # Managed-device handlers are module-level async functions. We use
+    # functools.partial to bind ``hass`` -- unlike a lambda, partial
+    # preserves ``iscoroutinefunction`` so HA awaits them correctly.
+    managed_device_service_map = {
+        SERVICE_MANAGED_DEVICE_COMMAND_RESPONSE: (
+            partial(handle_managed_device_command_response, hass),
+            SERVICE_MANAGED_DEVICE_COMMAND_RESPONSE_SCHEMA,
+        ),
+        SERVICE_MANAGED_DEVICE_SCREENSAVER_CONFIGURE: (
+            partial(handle_managed_device_screensaver_configure, hass),
+            SERVICE_MANAGED_DEVICE_SCREENSAVER_CONFIGURE_SCHEMA,
+        ),
+        SERVICE_MANAGED_DEVICE_SCREEN_CONFIGURE: (
+            partial(handle_managed_device_screen_configure, hass),
+            SERVICE_MANAGED_DEVICE_SCREEN_CONFIGURE_SCHEMA,
+        ),
+        SERVICE_MANAGED_DEVICE_SCREEN_WAKE_UP: (
+            partial(handle_managed_device_screen_wake_up, hass),
+            SERVICE_MANAGED_DEVICE_SCREEN_WAKE_UP_SCHEMA,
+        ),
+        SERVICE_MANAGED_DEVICE_AUDIO_CONFIGURE: (
+            partial(handle_managed_device_audio_configure, hass),
+            SERVICE_MANAGED_DEVICE_AUDIO_CONFIGURE_SCHEMA,
+        ),
+        SERVICE_MANAGED_DEVICE_APP_RELOAD: (
+            partial(handle_managed_device_app_reload, hass),
+            SERVICE_MANAGED_DEVICE_APP_RELOAD_SCHEMA,
+        ),
+        SERVICE_MANAGED_DEVICE_APP_LOCK: (
+            partial(handle_managed_device_app_lock, hass),
+            SERVICE_MANAGED_DEVICE_APP_LOCK_SCHEMA,
+        ),
+        SERVICE_MANAGED_DEVICE_APP_UNLOCK: (
+            partial(handle_managed_device_app_unlock, hass),
+            SERVICE_MANAGED_DEVICE_APP_UNLOCK_SCHEMA,
+        ),
+    }
+
+    for name, (handler, schema) in {**service_map, **managed_device_service_map}.items():
         if not hass.services.has_service(DOMAIN, name):
             hass.services.async_register(DOMAIN, name, handler, schema=schema)
 
-    # list_deep_link_destinations uses SupportsResponse
-    if not hass.services.has_service(DOMAIN, SERVICE_LIST_DEEP_LINK_DESTINATIONS):
-        hass.services.async_register(
-            DOMAIN,
-            SERVICE_LIST_DEEP_LINK_DESTINATIONS,
+    # Services that return responses to the caller
+    responsive_services = {
+        SERVICE_LIST_DEEP_LINK_DESTINATIONS: (
             handle_list_deep_link_destinations,
-            schema=SERVICE_LIST_DEEP_LINK_DESTINATIONS_SCHEMA,
-            supports_response=SupportsResponse.ONLY,
-        )
+            SERVICE_LIST_DEEP_LINK_DESTINATIONS_SCHEMA,
+            SupportsResponse.ONLY,
+        ),
+        SERVICE_REGISTER_MANAGED_DEVICE: (
+            partial(handle_register_managed_device, hass),
+            SERVICE_REGISTER_MANAGED_DEVICE_SCHEMA,
+            SupportsResponse.OPTIONAL,
+        ),
+        SERVICE_UNREGISTER_MANAGED_DEVICE: (
+            partial(handle_unregister_managed_device, hass),
+            SERVICE_UNREGISTER_MANAGED_DEVICE_SCHEMA,
+            SupportsResponse.OPTIONAL,
+        ),
+        SERVICE_UPDATE_MANAGED_DEVICE_STATE: (
+            partial(handle_update_managed_device_state, hass),
+            SERVICE_UPDATE_MANAGED_DEVICE_STATE_SCHEMA,
+            SupportsResponse.OPTIONAL,
+        ),
+    }
+
+    for name, (handler, schema, response_mode) in responsive_services.items():
+        if not hass.services.has_service(DOMAIN, name):
+            hass.services.async_register(
+                DOMAIN, name, handler, schema=schema,
+                supports_response=response_mode,
+            )
 
     return True
 
@@ -506,11 +620,18 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 
     if unload_ok:
+        registry = hass.data[DOMAIN].pop("managed_device_registry", None)
+        if registry:
+            registry.stop()
+
         for name in STATIC_SERVICES:
             hass.services.async_remove(DOMAIN, name)
 
         hass.data[DOMAIN].pop(entry.entry_id, None)
         hass.data[DOMAIN].pop("notify_entities", None)
         hass.data[DOMAIN].pop("async_add_notify_entities", None)
+        hass.data[DOMAIN].pop("async_add_managed_device_sensors", None)
+        hass.data[DOMAIN].pop("async_add_managed_device_binary_sensors", None)
+        hass.data[DOMAIN].pop("managed_device_entities", None)
 
     return unload_ok

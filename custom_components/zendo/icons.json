@@ -14,6 +14,39 @@
     },
     "doorbell_action": {
       "service": "mdi:bell-cancel"
+    },
+    "register_managed_device": {
+      "service": "mdi:tablet-cellphone"
+    },
+    "unregister_managed_device": {
+      "service": "mdi:tablet-off"
+    },
+    "managed_device_command_response": {
+      "service": "mdi:message-reply"
+    },
+    "update_managed_device_state": {
+      "service": "mdi:update"
+    },
+    "managed_device_screensaver_configure": {
+      "service": "mdi:weather-night"
+    },
+    "managed_device_screen_configure": {
+      "service": "mdi:brightness-6"
+    },
+    "managed_device_screen_wake_up": {
+      "service": "mdi:monitor-eye"
+    },
+    "managed_device_audio_configure": {
+      "service": "mdi:volume-high"
+    },
+    "managed_device_app_reload": {
+      "service": "mdi:refresh"
+    },
+    "managed_device_app_lock": {
+      "service": "mdi:lock"
+    },
+    "managed_device_app_unlock": {
+      "service": "mdi:lock-open-variant"
     }
   }
 }

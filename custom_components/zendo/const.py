@@ -16,6 +16,7 @@ CONF_PUSH_NOTIFICATION_TOKEN = "push_notification_token"
 CONF_REFRESH_TIMESTAMPS = "refresh_timestamps"
 CONF_CACHED_PROFILES = "cached_profiles"
 CONF_CACHED_DEEP_LINK_DESTINATIONS = "cached_deep_link_destinations"
+CONF_MANAGED_DEVICES = "managed_devices"
 
 SIGNAL_CONFIG_UPDATED = f"{DOMAIN}_config_updated"
 SIGNAL_PROFILES_UPDATED = f"{DOMAIN}_profiles_updated"

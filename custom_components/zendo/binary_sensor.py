@@ -28,6 +28,7 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up binary sensors from a config entry."""
+    hass.data[DOMAIN]["async_add_managed_device_binary_sensors"] = async_add_entities
     async_add_entities([BNGntStatusBinarySensor(entry)])
 
 
