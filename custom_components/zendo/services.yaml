@@ -1,5 +1,5 @@
 setup_push_notifications:
-  name: Set up push notifications
+  name: Set up push notifications [Internal]
   description: >-
     Store the JWT token used to authenticate with the Zendo push notification
     backend. This is typically called by the Zendo mobile app during setup. 
@@ -58,7 +58,7 @@ send_notification:
         text:
 
 set_deep_link_destinations:
-  name: Set deep link destinations
+  name: Set deep link destinations [Internal]
   description: >-
     Store the list of deep link destinations from the Zendo mobile app. This is
     an internal service and should not be called manually.
@@ -76,7 +76,7 @@ list_deep_link_destinations:
     List stored deep link destinations for use in automations.
 
 notify_site_config_manifest_update:
-  name: Notify site config manifest updated
+  name: Notify site config manifest updated [Internal]
   description: >-
     Broadcast a site config manifest update event to connected clients.
   fields:
@@ -159,7 +159,7 @@ ring_doorbell:
           mode: box
 
 doorbell_action:
-  name: Doorbell action
+  name: Doorbell action [Internal]
   description: >-
     Broadcast a doorbell action to connected Zendo apps. This is an internal
     service and should not be called manually.
@@ -184,7 +184,7 @@ doorbell_action:
 # ---------------------------------------------------------------------------
 
 register_managed_device:
-  name: Register managed device
+  name: Register managed device [Internal]
   description: >-
     Register a managed Zendo device. Creates or updates the device in the Home
     Assistant device registry and its sensor entities. This is an internal
@@ -242,7 +242,7 @@ register_managed_device:
         text:
 
 unregister_managed_device:
-  name: Unregister managed device
+  name: Unregister managed device [Internal]
   description: >-
     Mark a managed device as unavailable. The device and its entities remain in
     Home Assistant but show as unavailable. This is an internal service called
@@ -262,7 +262,7 @@ unregister_managed_device:
         text:
 
 managed_device_command_response:
-  name: Managed device command response
+  name: Managed device command response [Internal]
   description: >-
     Deliver a JSON-RPC response from a managed device back to the integration.
     This is an internal service called by the Zendo app and should not be
@@ -290,7 +290,7 @@ managed_device_command_response:
         text:
 
 update_managed_device_state:
-  name: Update managed device state
+  name: Update managed device state [Internal]
   description: >-
     Push a state update from a managed device. Updates the device's sensor
     entities and resets its online timer. This is an internal service called
@@ -321,15 +321,15 @@ update_managed_device_state:
 # ---------------------------------------------------------------------------
 
 managed_device_screensaver_configure:
-  name: Configure managed device screensaver
+  name: Configure device screensaver (Kiosk)
   description: >-
-    Configure the screensaver on a managed Zendo device. All settings are
+    Configure the screensaver on a Zendo device. All settings are
     optional - only the values you provide will be changed, the rest remain
     unchanged.
   fields:
     device:
       name: Device
-      description: Required. The managed Zendo device to configure.
+      description: Required. The Zendo device to configure.
       required: true
       selector:
         device:
@@ -366,15 +366,15 @@ managed_device_screensaver_configure:
           unit_of_measurement: "min"
 
 managed_device_screen_configure:
-  name: Configure managed device screen
+  name: Configure device screen (Kiosk)
   description: >-
-    Configure screen settings on a managed Zendo device. All settings are
+    Configure screen settings on a Zendo device. All settings are
     optional - only the values you provide will be changed, the rest remain
     unchanged.
   fields:
     device:
       name: Device
-      description: Required. The managed Zendo device to configure.
+      description: Required. The Zendo device to configure.
       required: true
       selector:
         device:
@@ -403,29 +403,29 @@ managed_device_screen_configure:
               value: "light"
 
 managed_device_screen_wake_up:
-  name: Wake up managed device screen
+  name: Wake up device screen (Kiosk)
   description: >-
-    Wake the screen on a managed Zendo device. The screen stays on until the
+    Wake the screen on a Zendo device. The screen stays on until the
     screensaver timer expires.
   fields:
     device:
       name: Device
-      description: Required. The managed Zendo device to wake up.
+      description: Required. The Zendo device to wake up.
       required: true
       selector:
         device:
           integration: zendo
 
 managed_device_audio_configure:
-  name: Configure managed device audio
+  name: Configure device audio (Kiosk)
   description: >-
-    Configure audio settings on a managed Zendo device. All settings are
+    Configure audio settings on a Zendo device. All settings are
     optional - only the values you provide will be changed, the rest remain
     unchanged.
   fields:
     device:
       name: Device
-      description: Required. The managed Zendo device to configure.
+      description: Required. The Zendo device to configure.
       required: true
       selector:
         device:
@@ -442,28 +442,28 @@ managed_device_audio_configure:
           unit_of_measurement: "%"
 
 managed_device_app_reload:
-  name: Reload managed device app
+  name: Reload device app (Kiosk)
   description: >-
-    Reload the Zendo app on a managed device.
+    Reload the Zendo app on a device.
   fields:
     device:
       name: Device
-      description: Required. The managed Zendo device to reload.
+      description: Required. The Zendo device to reload.
       required: true
       selector:
         device:
           integration: zendo
 
 managed_device_app_lock:
-  name: Lock managed device
+  name: Lock device (Kiosk)
   description: >-
-    Lock a managed Zendo device with a PIN. Device will require the PIN to
+    Lock a Zendo device with a PIN. Device will require the PIN to
     unlock locally. Device can also be unlocked remotely using the
     managed_device_app_unlock service.
   fields:
     device:
       name: Device
-      description: Required. The managed Zendo device to lock.
+      description: Required. The Zendo device to lock.
       required: true
       selector:
         device:
@@ -485,14 +485,14 @@ managed_device_app_lock:
         text:
 
 managed_device_app_unlock:
-  name: Unlock managed device
+  name: Unlock device (Kiosk)
   description: >-
-    Remotely unlock a managed Zendo device. No PIN is needed for remote
+    Remotely unlock a Zendo device. No PIN is needed for remote
     unlock.
   fields:
     device:
       name: Device
-      description: Required. The managed Zendo device to unlock.
+      description: Required. The Zendo device to unlock.
       required: true
       selector:
         device:
