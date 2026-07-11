@@ -12,7 +12,7 @@
   },
   "services": {
     "setup_push_notifications": {
-      "name": "Set up push notifications",
+      "name": "Set up push notifications [Internal]",
       "description": "Store the JWT token used to authenticate with the Zendo push notification backend. This is typically called by the Zendo mobile app during setup. This is an internal service and should not be called manually.",
       "fields": {
         "token": {
@@ -44,7 +44,7 @@
       }
     },
     "set_deep_link_destinations": {
-      "name": "Set deep link destinations",
+      "name": "Set deep link destinations [Internal]",
       "description": "Store the list of deep link destinations from the Zendo mobile app. This is an internal service and should not be called manually.",
       "fields": {
         "destinations": {
@@ -80,7 +80,7 @@
       }
     },
     "doorbell_action": {
-      "name": "Doorbell action",
+      "name": "Doorbell action [Internal]",
       "description": "Broadcast a doorbell action to connected Zendo apps. This is an internal service and should not be called manually.",
       "fields": {
         "event_id": {
@@ -94,7 +94,7 @@
       }
     },
     "register_managed_device": {
-      "name": "Register managed device",
+      "name": "Register managed device [Internal]",
       "description": "Register a managed Zendo device. Creates or updates the device in the Home Assistant device registry and its sensor entities. This is an internal service called by the Zendo app and should not be called manually.",
       "fields": {
         "profile_id": {
@@ -132,7 +132,7 @@
       }
     },
     "unregister_managed_device": {
-      "name": "Unregister managed device",
+      "name": "Unregister managed device [Internal]",
       "description": "Mark a managed device as unavailable. The device and its entities remain in Home Assistant but show as unavailable. This is an internal service called by the Zendo app and should not be called manually.",
       "fields": {
         "profile_id": {
@@ -146,7 +146,7 @@
       }
     },
     "managed_device_command_response": {
-      "name": "Managed device command response",
+      "name": "Managed device command response [Internal]",
       "description": "Deliver a JSON-RPC response from a managed device back to the integration. This is an internal service called by the Zendo app and should not be called manually.",
       "fields": {
         "profile_id": {
@@ -164,7 +164,7 @@
       }
     },
     "update_managed_device_state": {
-      "name": "Update managed device state",
+      "name": "Update managed device state [Internal]",
       "description": "Push a state update from a managed device. Updates the device's sensor entities and resets its online timer. This is an internal service called by the Zendo app and should not be called manually.",
       "fields": {
         "profile_id": {
@@ -182,12 +182,12 @@
       }
     },
     "managed_device_screensaver_configure": {
-      "name": "Configure managed device screensaver",
-      "description": "Configure the screensaver on a managed Zendo device. All settings are optional - only the values you provide will be changed, the rest remain unchanged.",
+      "name": "Configure device screensaver (Kiosk)",
+      "description": "Configure the screensaver on a Zendo device. All settings are optional - only the values you provide will be changed, the rest remain unchanged.",
       "fields": {
         "device": {
           "name": "Device",
-          "description": "Required. The managed Zendo device to configure."
+          "description": "Required. The Zendo device to configure."
         },
         "mode": {
           "name": "Mode",
@@ -200,12 +200,12 @@
       }
     },
     "managed_device_screen_configure": {
-      "name": "Configure managed device screen",
-      "description": "Configure screen settings on a managed Zendo device. All settings are optional - only the values you provide will be changed, the rest remain unchanged.",
+      "name": "Configure device screen (Kiosk)",
+      "description": "Configure screen settings on a Zendo device. All settings are optional - only the values you provide will be changed, the rest remain unchanged.",
       "fields": {
         "device": {
           "name": "Device",
-          "description": "Required. The managed Zendo device to configure."
+          "description": "Required. The Zendo device to configure."
         },
         "brightness": {
           "name": "Brightness",
@@ -218,22 +218,22 @@
       }
     },
     "managed_device_screen_wake_up": {
-      "name": "Wake up managed device screen",
-      "description": "Wake the screen on a managed Zendo device. The screen stays on until the screensaver timer expires.",
+      "name": "Wake up device screen (Kiosk)",
+      "description": "Wake the screen on a Zendo device. The screen stays on until the screensaver timer expires.",
       "fields": {
         "device": {
           "name": "Device",
-          "description": "Required. The managed Zendo device to wake up."
+          "description": "Required. The Zendo device to wake up."
         }
       }
     },
     "managed_device_audio_configure": {
-      "name": "Configure managed device audio",
-      "description": "Configure audio settings on a managed Zendo device. All settings are optional - only the values you provide will be changed, the rest remain unchanged.",
+      "name": "Configure device audio (Kiosk)",
+      "description": "Configure audio settings on a Zendo device. All settings are optional - only the values you provide will be changed, the rest remain unchanged.",
       "fields": {
         "device": {
           "name": "Device",
-          "description": "Required. The managed Zendo device to configure."
+          "description": "Required. The Zendo device to configure."
         },
         "volume": {
           "name": "Volume",
@@ -242,22 +242,22 @@
       }
     },
     "managed_device_app_reload": {
-      "name": "Reload managed device app",
-      "description": "Reload the Zendo app on a managed device.",
+      "name": "Reload device app (Kiosk)",
+      "description": "Reload the Zendo app on a device.",
       "fields": {
         "device": {
           "name": "Device",
-          "description": "Required. The managed Zendo device to reload."
+          "description": "Required. The Zendo device to reload."
         }
       }
     },
     "managed_device_app_lock": {
-      "name": "Lock managed device",
-      "description": "Lock a managed Zendo device with a PIN. Device will require the PIN to unlock locally. Device can also be unlocked remotely using the managed_device_app_unlock service.",
+      "name": "Lock device (Kiosk)",
+      "description": "Lock a Zendo device with a PIN. Device will require the PIN to unlock locally. Device can also be unlocked remotely using the managed_device_app_unlock service.",
       "fields": {
         "device": {
           "name": "Device",
-          "description": "Required. The managed Zendo device to lock."
+          "description": "Required. The Zendo device to lock."
         },
         "pin": {
           "name": "PIN",
@@ -270,12 +270,12 @@
       }
     },
     "managed_device_app_unlock": {
-      "name": "Unlock managed device",
-      "description": "Remotely unlock a managed Zendo device. No PIN is needed for remote unlock.",
+      "name": "Unlock device (Kiosk)",
+      "description": "Remotely unlock a Zendo device. No PIN is needed for remote unlock.",
       "fields": {
         "device": {
           "name": "Device",
-          "description": "Required. The managed Zendo device to unlock."
+          "description": "Required. The Zendo device to unlock."
         }
       }
     }
