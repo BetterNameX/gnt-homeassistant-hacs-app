@@ -326,10 +326,15 @@ managed_device_screensaver_configure:
     Configure the screensaver on a Zendo device. All settings are
     optional - only the values you provide will be changed, the rest remain
     unchanged.
-  target:
-    device:
-      integration: zendo
   fields:
+    device:
+      name: Device
+      description: Required. One or more Zendo devices.
+      required: true
+      selector:
+        device:
+          integration: zendo
+          multiple: true
     mode:
       name: Mode
       description: >-
@@ -367,10 +372,15 @@ managed_device_screen_configure:
     Configure screen settings on a Zendo device. All settings are
     optional - only the values you provide will be changed, the rest remain
     unchanged.
-  target:
-    device:
-      integration: zendo
   fields:
+    device:
+      name: Device
+      description: Required. One or more Zendo devices.
+      required: true
+      selector:
+        device:
+          integration: zendo
+          multiple: true
     brightness:
       name: Brightness
       description: Optional. Screen brightness (1-100%).
@@ -399,9 +409,15 @@ managed_device_screen_wake_up:
   description: >-
     Wake the screen on a Zendo device. The screen stays on until the
     screensaver timer expires.
-  target:
+  fields:
     device:
-      integration: zendo
+      name: Device
+      description: Required. One or more Zendo devices.
+      required: true
+      selector:
+        device:
+          integration: zendo
+          multiple: true
 
 managed_device_audio_configure:
   name: Configure device audio (Kiosk)
@@ -409,10 +425,15 @@ managed_device_audio_configure:
     Configure audio settings on a Zendo device. All settings are
     optional - only the values you provide will be changed, the rest remain
     unchanged.
-  target:
-    device:
-      integration: zendo
   fields:
+    device:
+      name: Device
+      description: Required. One or more Zendo devices.
+      required: true
+      selector:
+        device:
+          integration: zendo
+          multiple: true
     volume:
       name: Volume
       description: Optional. Device volume (0-100%).
@@ -428,9 +449,15 @@ managed_device_app_reload:
   name: Reload device app (Kiosk)
   description: >-
     Reload the Zendo app on a device.
-  target:
+  fields:
     device:
-      integration: zendo
+      name: Device
+      description: Required. One or more Zendo devices.
+      required: true
+      selector:
+        device:
+          integration: zendo
+          multiple: true
 
 managed_device_app_lock:
   name: Lock device (Kiosk)
@@ -438,10 +465,15 @@ managed_device_app_lock:
     Lock a Zendo device with a PIN. Device will require the PIN to
     unlock locally. Device can also be unlocked remotely using the
     managed_device_app_unlock service.
-  target:
-    device:
-      integration: zendo
   fields:
+    device:
+      name: Device
+      description: Required. One or more Zendo devices.
+      required: true
+      selector:
+        device:
+          integration: zendo
+          multiple: true
     pin:
       name: PIN
       description: >-
@@ -463,6 +495,12 @@ managed_device_app_unlock:
   description: >-
     Remotely unlock a Zendo device. No PIN is needed for remote
     unlock.
-  target:
+  fields:
     device:
-      integration: zendo
+      name: Device
+      description: Required. One or more Zendo devices.
+      required: true
+      selector:
+        device:
+          integration: zendo
+          multiple: true

@@ -214,40 +214,52 @@ def _validate_pin(value: str) -> str:
     return value
 
 
+_DEVICE_VALIDATOR = vol.Any(cv.string, [cv.string])
+
 SERVICE_MANAGED_DEVICE_SCREENSAVER_CONFIGURE_SCHEMA = vol.Schema(
     {
+        vol.Required("device"): _DEVICE_VALIDATOR,
         vol.Optional("mode"): vol.In(["none", "dim", "black", "clock"]),
         vol.Optional("timer"): vol.All(vol.Coerce(int), vol.Range(min=1, max=60)),
-    }
+    },
 )
 
 SERVICE_MANAGED_DEVICE_SCREEN_CONFIGURE_SCHEMA = vol.Schema(
     {
+        vol.Required("device"): _DEVICE_VALIDATOR,
         vol.Optional("brightness"): vol.All(
             vol.Coerce(int), vol.Range(min=1, max=100)
         ),
         vol.Optional("color_scheme"): vol.In(["dark", "light"]),
-    }
+    },
 )
 
-SERVICE_MANAGED_DEVICE_SCREEN_WAKE_UP_SCHEMA = vol.Schema({})
+SERVICE_MANAGED_DEVICE_SCREEN_WAKE_UP_SCHEMA = vol.Schema(
+    {vol.Required("device"): _DEVICE_VALIDATOR},
+)
 
 SERVICE_MANAGED_DEVICE_AUDIO_CONFIGURE_SCHEMA = vol.Schema(
     {
+        vol.Required("device"): _DEVICE_VALIDATOR,
         vol.Optional("volume"): vol.All(vol.Coerce(int), vol.Range(min=0, max=100)),
-    }
+    },
 )
 
-SERVICE_MANAGED_DEVICE_APP_RELOAD_SCHEMA = vol.Schema({})
+SERVICE_MANAGED_DEVICE_APP_RELOAD_SCHEMA = vol.Schema(
+    {vol.Required("device"): _DEVICE_VALIDATOR},
+)
 
 SERVICE_MANAGED_DEVICE_APP_LOCK_SCHEMA = vol.Schema(
     {
+        vol.Required("device"): _DEVICE_VALIDATOR,
         vol.Required("pin"): _validate_pin,
         vol.Optional("message"): cv.string,
-    }
+    },
 )
 
-SERVICE_MANAGED_DEVICE_APP_UNLOCK_SCHEMA = vol.Schema({})
+SERVICE_MANAGED_DEVICE_APP_UNLOCK_SCHEMA = vol.Schema(
+    {vol.Required("device"): _DEVICE_VALIDATOR},
+)
 
 
 # ---------------------------------------------------------------------------
@@ -874,14 +886,13 @@ async def handle_update_managed_device_state(
 def _resolve_devices_for_command(
     hass: HomeAssistant, call: ServiceCall
 ) -> tuple[BNGntManagedDeviceRegistry, list[str]]:
-    """Resolve targeted devices from the HA target selector to managed-device UIDs.
+    """Resolve the ``device`` field to managed-device UIDs.
 
-    The ``target:`` block in services.yaml provides a multi-select device
-    picker. HA merges the selected device IDs into ``call.data["device_id"]``
-    (a single string or a list). We resolve each to a managed-device UID.
+    The ``device`` field in services.yaml uses ``selector: device:`` with
+    ``multiple: true``, so the value is a list of HA device IDs.
     """
     registry = _get_registry(hass)
-    ha_device_ids = call.data.get("device_id", [])
+    ha_device_ids = call.data.get("device", [])
     if isinstance(ha_device_ids, str):
         ha_device_ids = [ha_device_ids]
 
