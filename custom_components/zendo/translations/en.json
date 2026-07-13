@@ -185,10 +185,6 @@
       "name": "Configure device screensaver (Kiosk)",
       "description": "Configure the screensaver on a Zendo device. All settings are optional - only the values you provide will be changed, the rest remain unchanged.",
       "fields": {
-        "device": {
-          "name": "Device",
-          "description": "Required. The Zendo device to configure."
-        },
         "mode": {
           "name": "Mode",
           "description": "Optional. The screensaver mode. \"none\" disables the screensaver, \"dim\" reduces brightness but keeps content visible, \"black\" turns the screen fully dark, \"clock\" shows a clock on a dark background."
@@ -203,10 +199,6 @@
       "name": "Configure device screen (Kiosk)",
       "description": "Configure screen settings on a Zendo device. All settings are optional - only the values you provide will be changed, the rest remain unchanged.",
       "fields": {
-        "device": {
-          "name": "Device",
-          "description": "Required. The Zendo device to configure."
-        },
         "brightness": {
           "name": "Brightness",
           "description": "Optional. Screen brightness (1-100%)."
@@ -219,22 +211,12 @@
     },
     "managed_device_screen_wake_up": {
       "name": "Wake up device screen (Kiosk)",
-      "description": "Wake the screen on a Zendo device. The screen stays on until the screensaver timer expires.",
-      "fields": {
-        "device": {
-          "name": "Device",
-          "description": "Required. The Zendo device to wake up."
-        }
-      }
+      "description": "Wake the screen on a Zendo device. The screen stays on until the screensaver timer expires."
     },
     "managed_device_audio_configure": {
       "name": "Configure device audio (Kiosk)",
       "description": "Configure audio settings on a Zendo device. All settings are optional - only the values you provide will be changed, the rest remain unchanged.",
       "fields": {
-        "device": {
-          "name": "Device",
-          "description": "Required. The Zendo device to configure."
-        },
         "volume": {
           "name": "Volume",
           "description": "Optional. Device volume (0-100%)."
@@ -243,22 +225,12 @@
     },
     "managed_device_app_reload": {
       "name": "Reload device app (Kiosk)",
-      "description": "Reload the Zendo app on a device.",
-      "fields": {
-        "device": {
-          "name": "Device",
-          "description": "Required. The Zendo device to reload."
-        }
-      }
+      "description": "Reload the Zendo app on a device."
     },
     "managed_device_app_lock": {
       "name": "Lock device (Kiosk)",
       "description": "Lock a Zendo device with a PIN. Device will require the PIN to unlock locally. Device can also be unlocked remotely using the managed_device_app_unlock service.",
       "fields": {
-        "device": {
-          "name": "Device",
-          "description": "Required. The Zendo device to lock."
-        },
         "pin": {
           "name": "PIN",
           "description": "Required. A numeric PIN that must be entered to unlock the device. Must be exactly 4, 6, or 8 digits."
@@ -271,13 +243,7 @@
     },
     "managed_device_app_unlock": {
       "name": "Unlock device (Kiosk)",
-      "description": "Remotely unlock a Zendo device. No PIN is needed for remote unlock.",
-      "fields": {
-        "device": {
-          "name": "Device",
-          "description": "Required. The Zendo device to unlock."
-        }
-      }
+      "description": "Remotely unlock a Zendo device. No PIN is needed for remote unlock."
     }
   }
 }

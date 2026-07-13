@@ -216,7 +216,6 @@ def _validate_pin(value: str) -> str:
 
 SERVICE_MANAGED_DEVICE_SCREENSAVER_CONFIGURE_SCHEMA = vol.Schema(
     {
-        vol.Required("device"): cv.string,
         vol.Optional("mode"): vol.In(["none", "dim", "black", "clock"]),
         vol.Optional("timer"): vol.All(vol.Coerce(int), vol.Range(min=1, max=60)),
     }
@@ -224,7 +223,6 @@ SERVICE_MANAGED_DEVICE_SCREENSAVER_CONFIGURE_SCHEMA = vol.Schema(
 
 SERVICE_MANAGED_DEVICE_SCREEN_CONFIGURE_SCHEMA = vol.Schema(
     {
-        vol.Required("device"): cv.string,
         vol.Optional("brightness"): vol.All(
             vol.Coerce(int), vol.Range(min=1, max=100)
         ),
@@ -232,32 +230,24 @@ SERVICE_MANAGED_DEVICE_SCREEN_CONFIGURE_SCHEMA = vol.Schema(
     }
 )
 
-SERVICE_MANAGED_DEVICE_SCREEN_WAKE_UP_SCHEMA = vol.Schema(
-    {vol.Required("device"): cv.string}
-)
+SERVICE_MANAGED_DEVICE_SCREEN_WAKE_UP_SCHEMA = vol.Schema({})
 
 SERVICE_MANAGED_DEVICE_AUDIO_CONFIGURE_SCHEMA = vol.Schema(
     {
-        vol.Required("device"): cv.string,
         vol.Optional("volume"): vol.All(vol.Coerce(int), vol.Range(min=0, max=100)),
     }
 )
 
-SERVICE_MANAGED_DEVICE_APP_RELOAD_SCHEMA = vol.Schema(
-    {vol.Required("device"): cv.string}
-)
+SERVICE_MANAGED_DEVICE_APP_RELOAD_SCHEMA = vol.Schema({})
 
 SERVICE_MANAGED_DEVICE_APP_LOCK_SCHEMA = vol.Schema(
     {
-        vol.Required("device"): cv.string,
         vol.Required("pin"): _validate_pin,
         vol.Optional("message"): cv.string,
     }
 )
 
-SERVICE_MANAGED_DEVICE_APP_UNLOCK_SCHEMA = vol.Schema(
-    {vol.Required("device"): cv.string}
-)
+SERVICE_MANAGED_DEVICE_APP_UNLOCK_SCHEMA = vol.Schema({})
 
 
 # ---------------------------------------------------------------------------
@@ -881,31 +871,51 @@ async def handle_update_managed_device_state(
 # are included. The device leaves omitted settings unchanged.
 # ---------------------------------------------------------------------------
 
-def _resolve_device_for_command(
+def _resolve_devices_for_command(
     hass: HomeAssistant, call: ServiceCall
-) -> tuple[BNGntManagedDeviceRegistry, str]:
-    """Resolve the ``device`` field to a managed-device UID.
+) -> tuple[BNGntManagedDeviceRegistry, list[str]]:
+    """Resolve targeted devices from the HA target selector to managed-device UIDs.
 
-    The ``device`` field comes from an HA device selector
-    (``selector: device: integration: zendo``) and contains an HA
-    device-registry ID. We look up the device's identifiers to find
-    the ``{profile_id}_{device_id}`` UID used internally.
+    The ``target:`` block in services.yaml provides a multi-select device
+    picker. HA merges the selected device IDs into ``call.data["device_id"]``
+    (a single string or a list). We resolve each to a managed-device UID.
     """
     registry = _get_registry(hass)
-    ha_device_id = call.data["device"]
-    uid = registry.resolve_ha_device_to_uid(ha_device_id)
-    if not uid:
+    ha_device_ids = call.data.get("device_id", [])
+    if isinstance(ha_device_ids, str):
+        ha_device_ids = [ha_device_ids]
+
+    uids: list[str] = []
+    for ha_device_id in ha_device_ids:
+        uid = registry.resolve_ha_device_to_uid(ha_device_id)
+        if uid:
+            uids.append(uid)
+
+    if not uids:
         raise ServiceValidationError(
-            "The selected device is not a managed device. "
-            "Please select a Zendo tablet from the device list."
+            "No managed devices found in the selected targets. "
+            "Please select one or more Zendo tablets."
         )
-    return registry, uid
+    return registry, uids
+
+
+async def _fan_out_command(
+    registry: BNGntManagedDeviceRegistry,
+    uids: list[str],
+    method: str,
+    params: dict | None = None,
+) -> None:
+    """Send a command to multiple devices in parallel."""
+    await asyncio.gather(*(
+        registry.send_command(uid, method, params)
+        for uid in uids
+    ))
 
 
 async def handle_managed_device_screensaver_configure(
     hass: HomeAssistant, call: ServiceCall
 ) -> None:
-    registry, uid = _resolve_device_for_command(hass, call)
+    registry, uids = _resolve_devices_for_command(hass, call)
 
     params: dict = {}
     if "mode" in call.data:
@@ -913,13 +923,13 @@ async def handle_managed_device_screensaver_configure(
     if "timer" in call.data:
         params["timer"] = call.data["timer"]
 
-    await registry.send_command(uid, "screensaver.set", params)
+    await _fan_out_command(registry, uids, "screensaver.set", params)
 
 
 async def handle_managed_device_screen_configure(
     hass: HomeAssistant, call: ServiceCall
 ) -> None:
-    registry, uid = _resolve_device_for_command(hass, call)
+    registry, uids = _resolve_devices_for_command(hass, call)
 
     params: dict = {}
     if "brightness" in call.data:
@@ -927,49 +937,49 @@ async def handle_managed_device_screen_configure(
     if "color_scheme" in call.data:
         params["colorScheme"] = call.data["color_scheme"]
 
-    await registry.send_command(uid, "screen.set", params)
+    await _fan_out_command(registry, uids, "screen.set", params)
 
 
 async def handle_managed_device_screen_wake_up(
     hass: HomeAssistant, call: ServiceCall
 ) -> None:
-    registry, uid = _resolve_device_for_command(hass, call)
-    await registry.send_command(uid, "screen.wakeUp", {})
+    registry, uids = _resolve_devices_for_command(hass, call)
+    await _fan_out_command(registry, uids, "screen.wakeUp")
 
 
 async def handle_managed_device_audio_configure(
     hass: HomeAssistant, call: ServiceCall
 ) -> None:
-    registry, uid = _resolve_device_for_command(hass, call)
+    registry, uids = _resolve_devices_for_command(hass, call)
 
     params: dict = {}
     if "volume" in call.data:
         params["volume"] = call.data["volume"]
 
-    await registry.send_command(uid, "audio.set", params)
+    await _fan_out_command(registry, uids, "audio.set", params)
 
 
 async def handle_managed_device_app_reload(
     hass: HomeAssistant, call: ServiceCall
 ) -> None:
-    registry, uid = _resolve_device_for_command(hass, call)
-    await registry.send_command(uid, "app.reload", {})
+    registry, uids = _resolve_devices_for_command(hass, call)
+    await _fan_out_command(registry, uids, "app.reload")
 
 
 async def handle_managed_device_app_lock(
     hass: HomeAssistant, call: ServiceCall
 ) -> None:
-    registry, uid = _resolve_device_for_command(hass, call)
+    registry, uids = _resolve_devices_for_command(hass, call)
 
     params: dict = {"pin": call.data["pin"]}
     if "message" in call.data:
         params["message"] = call.data["message"]
 
-    await registry.send_command(uid, "app.lock", params)
+    await _fan_out_command(registry, uids, "app.lock", params)
 
 
 async def handle_managed_device_app_unlock(
     hass: HomeAssistant, call: ServiceCall
 ) -> None:
-    registry, uid = _resolve_device_for_command(hass, call)
-    await registry.send_command(uid, "app.unlock", {})
+    registry, uids = _resolve_devices_for_command(hass, call)
+    await _fan_out_command(registry, uids, "app.unlock")
